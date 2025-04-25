@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+unsigned long long base_to_decimal(const char *str, int base) {
+    unsigned long long result = 0;
+    int len = strlen(str);
+    for (int i = 0; i < len; i++) {
+        char ch = str[i];
+        int digit;
+        if (ch >= '0' && ch <= '9')
+            digit = ch - '0';
+        else if (ch >= 'a' && ch <= 'z')
+            digit = ch - 'a' + 10;
+        else if (ch >= 'A' && ch <= 'Z')
+            digit = ch - 'A' + 10;
+        else
+            continue;
+
+        if (digit >= base) {
+            printf("Invalid digit '%c' for base %d\n", ch, base);
+            exit(1);
+        }
+        result = result * base + digit;
+    }
+    return result;
+}
+
+long long lagrange_constant_term(int x[], unsigned long long y[], int k) {
+    long double result = 0.0;
+
+    for (int i = 0; i < k; i++) {
+        long double term = y[i];
+
+        for (int j = 0; j < k; j++) {
+            if (j != i) {
+                term *= (double)(-x[j]) / (x[i] - x[j]);
+            }
+        }
+        result += term;
+    }
+
+    return (long long)(round(result));
+}
+
+int main() {
+    int k1 = 3;
+    int x1[] = {1, 2, 3}; // JSON keys
+    const char *base1[] = {"10", "2", "10"};
+    const char *val1[] = {"4", "111", "12"};
+
+    unsigned long long y1[3];
+    for (int i = 0; i < k1; i++) {
+        y1[i] = base_to_decimal(val1[i], atoi(base1[i]));
+    }
+
+    long long secret1 = lagrange_constant_term(x1, y1, k1);
+
+    int k2 = 7;
+    int x2[] = {1, 2, 3, 4, 5, 6, 7};
+    const char *base2[] = {
+        "6", "15", "15", "16", "8", "3", "3"
+    };
+    const char *val2[] = {
+        "13444211440455345511",
+        "aed7015a346d63",
+        "6aeeb69631c227c",
+        "e1b5e05623d881f",
+        "316034514573652620673",
+        "2122212201122002221120200210011020220200",
+        "20120221122211000100210021102001201112121"
+    };
+
+    unsigned long long y2[7];
+    for (int i = 0; i < k2; i++) {
+        y2[i] = base_to_decimal(val2[i], atoi(base2[i]));
+    }
+
+    long long secret2 = lagrange_constant_term(x2, y2, k2);
+
+    // Print results in JSON format
+    printf("{\n");
+    printf("    \"TestCase1_Secret\": %lld,\n", secret1);
+    printf("    \"TestCase2_Secret\": %lld\n", secret2);
+    printf("}\n");
+
+    return 0;
+}
